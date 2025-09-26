@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Immobilière Pro - Marchands de Biens</title>
+    <meta name="description" content="Application professionnelle d'analyse immobilière pour marchands de biens. Évaluez le potentiel d'investissement avec des calculs financiers précis.">
+    
+    <!-- CDN Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <link rel="stylesheet" href="styles-standalone.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="icon-wrapper">
+                        <i data-lucide="building"></i>
+                    </div>
+                    <div>
+                        <h1>Analyse Immobilière Pro</h1>
+                        <p class="subtitle">Outil professionnel pour marchands de biens</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="exportPdf">
+                    <i data-lucide="download"></i>
+                    Exporter PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="grid-layout">
+                <!-- Left Panel - Forms -->
+                <div class="left-panel">
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <div class="tabs-list">
+                            <button class="tab-trigger active" data-tab="basic">
+                                <i data-lucide="building"></i>
+                                Bien
+                            </button>
+                            <button class="tab-trigger" data-tab="financial">
+                                <i data-lucide="calculator"></i>
+                                Financier
+                            </button>
+                            <button class="tab-trigger" data-tab="technical">
+                                <i data-lucide="wrench"></i>
+                                Technique
+                            </button>
+                            <button class="tab-trigger" data-tab="market">
+                                <i data-lucide="map-pin"></i>
+                                Marché
+                            </button>
+                        </div>
+
+                        <!-- Tab Contents -->
+                        <div class="tab-content active" id="basic">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i data-lucide="building"></i>
+                                        Informations du bien
+                                    </h3>
+                                    <p class="card-description">Renseignez les caractéristiques principales du bien immobilier</p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="title">Titre de l'annonce</label>
+                                            <input type="text" id="title" placeholder="Ex: Appartement 3 pièces à rénover">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="location">Localisation</label>
+                                            <input type="text" id="location" placeholder="Ex: Paris 11ème">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="price">Prix demandé (€)</label>
+                                            <input type="number" id="price" placeholder="250000">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="surface">Surface (m²)</label>
+                                            <input type="number" id="surface" placeholder="65">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="description">Description de l'annonce</label>
+                                        <textarea id="description" rows="6" placeholder="Collez ici le contenu de l'annonce immobilière..."></textarea>
+                                    </div>
+                                    <div id="pricePerSqmDisplay" class="info-box" style="display: none;">
+                                        <p>Prix au m² : <span id="pricePerSqmValue" class="highlight"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="financial">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i data-lucide="calculator"></i>
+                                        Analyse financière
+                                    </h3>
+                                    <p class="card-description">Estimez les coûts et la rentabilité du projet</p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="notaryFees">Frais de notaire (€)</label>
+                                            <input type="number" id="notaryFees" placeholder="20000">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="renovationCosts">Coût des travaux (€)</label>
+                                            <input type="number" id="renovationCosts" placeholder="50000">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="resalePrice">Prix de revente estimé (€)</label>
+                                            <input type="number" id="resalePrice" placeholder="380000">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="timeToSell">Délai de revente (mois)</label>
+                                            <input type="number" id="timeToSell" placeholder="8">
+                                        </div>
+                                    </div>
+                                    <div id="financialSummary"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="technical">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i data-lucide="wrench"></i>
+                                        État technique
+                                    </h3>
+                                    <p class="card-description">Évaluez l'état général du bien et les travaux nécessaires</p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="technical-grid">
+                                        <div class="condition-group">
+                                            <label>État structurel (/10)</label>
+                                            <div class="progress-container">
+                                                <div class="progress">
+                                                    <div class="progress-bar" id="structuralProgress"></div>
+                                                </div>
+                                                <div class="progress-labels">
+                                                    <span>Mauvais</span>
+                                                    <span id="structuralValue">5/10</span>
+                                                    <span>Excellent</span>
+                                                </div>
+                                            </div>
+                                            <input type="range" id="structuralCondition" min="0" max="10" step="0.5" value="5">
+                                        </div>
+                                        
+                                        <div class="condition-group">
+                                            <label>État technique (/10)</label>
+                                            <div class="progress-container">
+                                                <div class="progress">
+                                                    <div class="progress-bar" id="technicalProgress"></div>
+                                                </div>
+                                                <div class="progress-labels">
+                                                    <span>Mauvais</span>
+                                                    <span id="technicalValue">5/10</span>
+                                                    <span>Excellent</span>
+                                                </div>
+                                            </div>
+                                            <input type="range" id="technicalCondition" min="0" max="10" step="0.5" value="5">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="energyRating">Classe énergétique</label>
+                                        <select id="energyRating">
+                                            <option value="A">A - Très économe</option>
+                                            <option value="B">B - Économe</option>
+                                            <option value="C">C - Correct</option>
+                                            <option value="D" selected>D - Moyen</option>
+                                            <option value="E">E - Énergivore</option>
+                                            <option value="F">F - Très énergivore</option>
+                                            <option value="G">G - Extrêmement énergivore</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="market">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i data-lucide="map-pin"></i>
+                                        Analyse de marché
+                                    </h3>
+                                    <p class="card-description">Évaluez le marché local et les tendances</p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="marketTrend">Tendance du marché (%/an)</label>
+                                            <input type="number" id="marketTrend" step="0.1" placeholder="2.5">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sellingTime">Temps de vente moyen (mois)</label>
+                                            <input type="number" id="sellingTime" placeholder="6" value="6">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Strategy Comparison -->
+                    <div id="strategyComparison"></div>
+                </div>
+
+                <!-- Right Panel - Summary & Analysis -->
+                <div class="right-panel">
+                    <!-- Recommendation -->
+                    <div class="card" id="recommendationCard">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i data-lucide="target"></i>
+                                Recommandation
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div id="recommendationContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Global Scores -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i data-lucide="bar-chart-3"></i>
+                                Score Global
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div id="globalScores"></div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Analysis -->
+                    <div id="riskAnalysis"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script-standalone.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
