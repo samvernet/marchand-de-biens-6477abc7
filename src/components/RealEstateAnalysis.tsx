@@ -84,6 +84,72 @@ export function RealEstateAnalysis() {
     }));
   };
 
+  const estimateResalePrice = () => {
+    if (!propertyData.price || !propertyData.surface || !propertyData.location) {
+      toast({
+        title: "Données manquantes",
+        description: "Veuillez renseigner le prix, la surface et la localisation pour l'estimation",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Facteurs d'estimation basés sur différents critères
+    let estimationMultiplier = 1;
+    
+    // Facteur location (très simplifié)
+    const locationLower = propertyData.location.toLowerCase();
+    if (locationLower.includes('paris') || locationLower.includes('lyon') || locationLower.includes('marseille')) {
+      estimationMultiplier += 0.15; // +15% pour grandes villes
+    } else if (locationLower.includes('bordeaux') || locationLower.includes('toulouse') || locationLower.includes('nantes')) {
+      estimationMultiplier += 0.10; // +10% pour villes moyennes
+    }
+
+    // Facteur état du bien
+    if (propertyData.structuralCondition >= 8) {
+      estimationMultiplier += 0.10; // +10% si excellent état
+    } else if (propertyData.structuralCondition >= 6) {
+      estimationMultiplier += 0.05; // +5% si bon état
+    } else if (propertyData.structuralCondition <= 4) {
+      estimationMultiplier -= 0.05; // -5% si mauvais état
+    }
+
+    // Facteur travaux
+    if (propertyData.renovationCosts) {
+      const worksCostPerSqm = propertyData.renovationCosts / propertyData.surface;
+      if (worksCostPerSqm > 1000) {
+        estimationMultiplier += 0.12; // +12% si gros travaux (rénovation complète)
+      } else if (worksCostPerSqm > 500) {
+        estimationMultiplier += 0.08; // +8% si travaux moyens
+      } else {
+        estimationMultiplier += 0.04; // +4% si petits travaux
+      }
+    }
+
+    // Facteur description (mots-clés positifs)
+    const description = propertyData.description.toLowerCase();
+    if (description.includes('rénové') || description.includes('neuf') || description.includes('moderne')) {
+      estimationMultiplier += 0.05;
+    }
+    if (description.includes('balcon') || description.includes('terrasse') || description.includes('jardin')) {
+      estimationMultiplier += 0.03;
+    }
+    if (description.includes('parking') || description.includes('garage')) {
+      estimationMultiplier += 0.02;
+    }
+
+    // Calcul du prix de revente estimé
+    const basePrice = propertyData.price + (propertyData.renovationCosts || 0) + (propertyData.notaryFees || 0);
+    const estimatedResalePrice = Math.round(basePrice * estimationMultiplier);
+    
+    updateData('resalePrice', estimatedResalePrice);
+    
+    toast({
+      title: "Estimation calculée",
+      description: `Prix de revente estimé : ${estimatedResalePrice.toLocaleString('fr-FR')} €`,
+    });
+  };
+
   const analyzeListingUrl = async () => {
     if (!listingUrl.trim()) {
       toast({
@@ -471,13 +537,29 @@ export function RealEstateAnalysis() {
                       </div>
                       <div>
                         <Label htmlFor="resalePrice">Prix de revente estimé (€)</Label>
-                        <Input
-                          id="resalePrice"
-                          type="number"
-                          value={propertyData.resalePrice || ''}
-                          onChange={(e) => updateData('resalePrice', Number(e.target.value))}
-                          placeholder="380000"
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            id="resalePrice"
+                            type="number"
+                            value={propertyData.resalePrice || ''}
+                            onChange={(e) => updateData('resalePrice', Number(e.target.value))}
+                            placeholder="380000"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={estimateResalePrice}
+                            disabled={!propertyData.price || !propertyData.surface || !propertyData.location}
+                            className="px-3"
+                          >
+                            Estimer
+                          </Button>
+                        </div>
+                        {propertyData.resalePrice && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Estimation basée sur le marché local et l'état du bien
+                          </p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="timeToSell">Délai de revente (mois)</Label>
