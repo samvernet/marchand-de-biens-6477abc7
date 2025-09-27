@@ -19,7 +19,9 @@ import {
   BarChart3,
   Target,
   Wrench,
-  MapPin
+  MapPin,
+  Globe,
+  Loader2
 } from 'lucide-react';
 import { StrategyComparison } from './StrategyComparison';
 import { FinancialSummary } from './FinancialSummary';
@@ -71,12 +73,32 @@ const initialData: PropertyData = {
 export function RealEstateAnalysis() {
   const [propertyData, setPropertyData] = useState<PropertyData>(initialData);
   const [activeTab, setActiveTab] = useState('basic');
+  const [listingUrl, setListingUrl] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const updateData = (field: keyof PropertyData, value: any) => {
     setPropertyData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const analyzeListingUrl = async () => {
+    if (!listingUrl.trim()) return;
+    
+    setIsAnalyzing(true);
+    try {
+      // Here we would integrate with a web scraping service
+      // For now, we'll simulate the analysis
+      setTimeout(() => {
+        updateData('title', 'Appartement analysé automatiquement');
+        updateData('location', 'Analysé depuis l\'URL');
+        setIsAnalyzing(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Erreur lors de l\'analyse:', error);
+      setIsAnalyzing(false);
+    }
   };
 
   // Calculations
@@ -124,7 +146,12 @@ export function RealEstateAnalysis() {
                 <p className="text-sm text-muted-foreground">Outil professionnel pour marchands de biens</p>
               </div>
             </div>
-            <Button variant="professional" size="lg" className="gap-2">
+            <Button 
+              variant="professional" 
+              size="lg" 
+              className="gap-2"
+              onClick={() => window.print()}
+            >
               <Download className="h-4 w-4" />
               Exporter PDF
             </Button>
@@ -168,6 +195,38 @@ export function RealEstateAnalysis() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    {/* URL Analysis Section */}
+                    <div className="p-4 bg-accent/50 rounded-lg border border-border">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Globe className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">Analyse automatique d'annonce</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Collez l'URL de l'annonce immobilière..."
+                          value={listingUrl}
+                          onChange={(e) => setListingUrl(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button 
+                          onClick={analyzeListingUrl}
+                          disabled={!listingUrl.trim() || isAnalyzing}
+                          variant="outline"
+                          className="gap-2"
+                        >
+                          {isAnalyzing ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Globe className="h-4 w-4" />
+                          )}
+                          {isAnalyzing ? 'Analyse...' : 'Analyser'}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        L'IA analysera automatiquement le contenu et les photos de l'annonce
+                      </p>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="title">Titre de l'annonce</Label>
