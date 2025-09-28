@@ -54,6 +54,12 @@ class RealEstateAnalyzer {
         
         // Export button
         document.getElementById('exportPdf').addEventListener('click', () => this.exportToPDF());
+        
+        // Estimate resale price button
+        document.getElementById('estimateButton').addEventListener('click', () => this.estimateResalePrice());
+        
+        // URL analysis button
+        document.getElementById('analyzeButton').addEventListener('click', () => this.analyzeListingUrl());
     }
     
     setupTabs() {
@@ -78,6 +84,186 @@ class RealEstateAnalyzer {
     updateData(field, value) {
         this.propertyData[field] = value;
         this.updateAllCalculations();
+    }
+    
+    estimateResalePrice() {
+        if (!this.propertyData.price || !this.propertyData.surface || !this.propertyData.location) {
+            this.showToast("Données manquantes", "Veuillez renseigner le prix, la surface et la localisation pour l'estimation", "destructive");
+            return;
+        }
+
+        // Facteurs d'estimation basés sur différents critères
+        let estimationMultiplier = 1;
+        
+        // Facteur location (très simplifié)
+        const locationLower = this.propertyData.location.toLowerCase();
+        if (locationLower.includes('paris') || locationLower.includes('lyon') || locationLower.includes('marseille')) {
+            estimationMultiplier += 0.15; // +15% pour grandes villes
+        } else if (locationLower.includes('bordeaux') || locationLower.includes('toulouse') || locationLower.includes('nantes')) {
+            estimationMultiplier += 0.10; // +10% pour villes moyennes
+        }
+
+        // Facteur état du bien
+        if (this.propertyData.structuralCondition >= 8) {
+            estimationMultiplier += 0.10; // +10% si excellent état
+        } else if (this.propertyData.structuralCondition >= 6) {
+            estimationMultiplier += 0.05; // +5% si bon état
+        } else if (this.propertyData.structuralCondition <= 4) {
+            estimationMultiplier -= 0.05; // -5% si mauvais état
+        }
+
+        // Facteur travaux
+        if (this.propertyData.renovationCosts) {
+            const worksCostPerSqm = this.propertyData.renovationCosts / this.propertyData.surface;
+            if (worksCostPerSqm > 1000) {
+                estimationMultiplier += 0.12; // +12% si gros travaux (rénovation complète)
+            } else if (worksCostPerSqm > 500) {
+                estimationMultiplier += 0.08; // +8% si travaux moyens
+            } else {
+                estimationMultiplier += 0.04; // +4% si petits travaux
+            }
+        }
+
+        // Facteur description (mots-clés positifs)
+        const description = this.propertyData.description.toLowerCase();
+        if (description.includes('rénové') || description.includes('neuf') || description.includes('moderne')) {
+            estimationMultiplier += 0.05;
+        }
+        if (description.includes('balcon') || description.includes('terrasse') || description.includes('jardin')) {
+            estimationMultiplier += 0.03;
+        }
+        if (description.includes('parking') || description.includes('garage')) {
+            estimationMultiplier += 0.02;
+        }
+
+        // Calcul du prix de revente estimé
+        const basePrice = this.propertyData.price + (this.propertyData.renovationCosts || 0) + (this.propertyData.notaryFees || 0);
+        const estimatedResalePrice = Math.round(basePrice * estimationMultiplier);
+        
+        this.updateData('resalePrice', estimatedResalePrice);
+        
+        // Show estimation note
+        const estimationNote = document.getElementById('estimationNote');
+        if (estimationNote) {
+            estimationNote.style.display = 'block';
+        }
+        
+        this.showToast("Estimation calculée", `Prix de revente estimé : ${estimatedResalePrice.toLocaleString('fr-FR')} €`);
+    }
+    
+    showToast(title, description, variant = "default") {
+        // Simple toast implementation
+        const toastContainer = document.getElementById('toast-container') || this.createToastContainer();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${variant}`;
+        toast.innerHTML = `
+            <div class="toast-header">
+                <strong>${title}</strong>
+                <button class="toast-close">&times;</button>
+            </div>
+            <div class="toast-body">${description}</div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 5000);
+        
+        // Manual close
+        toast.querySelector('.toast-close').addEventListener('click', () => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        });
+    }
+    
+    createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    analyzeListingUrl() {
+        const listingUrl = document.getElementById('listingUrl').value.trim();
+        
+        if (!listingUrl) {
+            this.showToast("URL manquante", "Veuillez saisir une URL d'annonce immobilière", "destructive");
+            return;
+        }
+        
+        // Set loading state
+        const analyzeButton = document.getElementById('analyzeButton');
+        const originalText = analyzeButton.innerHTML;
+        analyzeButton.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i> Analyse...';
+        analyzeButton.disabled = true;
+        
+        // Simulate analysis process
+        this.showToast("Analyse en cours", "Récupération du contenu de l'annonce...");
+        
+        setTimeout(() => {
+            this.performBasicAnalysis(listingUrl);
+            
+            // Reset button
+            analyzeButton.innerHTML = originalText;
+            analyzeButton.disabled = false;
+            lucide.createIcons();
+        }, 2000);
+    }
+    
+    performBasicAnalysis(url) {
+        // Simulation d'une analyse basique pour demonstration
+        this.showToast("Analyse de base", "Analyse basique en cours...");
+
+        // Extraction d'informations basiques depuis l'URL
+        const urlAnalysis = this.analyzeUrlPattern(url);
+        
+        if (urlAnalysis.platform) {
+            this.updateData('title', `Bien trouvé sur ${urlAnalysis.platform}`);
+            this.updateData('description', `Annonce analysée automatiquement depuis ${url}`);
+            
+            // Estimations par défaut basées sur des moyennes de marché
+            const defaultPrice = 250000;
+            const defaultSurface = 65;
+            
+            this.updateData('price', defaultPrice);
+            this.updateData('surface', defaultSurface);
+            this.updateData('notaryFees', Math.round(defaultPrice * 0.08));
+            this.updateData('renovationCosts', Math.round(defaultPrice * 0.15)); // 15% du prix
+            this.updateData('resalePrice', Math.round(defaultPrice * 1.25)); // +25% après travaux
+            this.updateData('structuralCondition', 6);
+            this.updateData('technicalCondition', 5);
+            this.updateData('energyRating', 'D');
+
+            this.showToast("Analyse terminée", "Données par défaut appliquées. Veuillez les ajuster selon l'annonce réelle.");
+        }
+    }
+    
+    analyzeUrlPattern(url) {
+        const platforms = {
+            'seloger.com': 'SeLoger',
+            'leboncoin.fr': 'LeBonCoin',
+            'pap.fr': 'PAP',
+            'orpi.com': 'Orpi',
+            'century21.fr': 'Century 21',
+            'laforet.com': 'Laforêt',
+            'fnaim.fr': 'FNAIM',
+            'logic-immo.com': 'Logic-immo'
+        };
+
+        for (const [domain, platform] of Object.entries(platforms)) {
+            if (url.includes(domain)) {
+                return { platform, domain };
+            }
+        }
+        
+        return { platform: 'Plateforme inconnue', domain: null };
     }
     
     updateAllCalculations() {

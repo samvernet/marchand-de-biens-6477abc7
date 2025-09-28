@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analyse Immobilière Pro - Marchands de Biens</title>
-    <meta name="description" content="Application professionnelle d'analyse immobilière pour marchands de biens. Évaluez le potentiel d'investissement avec des calculs financiers précis.">
+    <title>Analyse Immobilière Pro - Outil professionnel pour marchands de biens</title>
     
     <!-- CDN Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     
+    <!-- Styles -->
     <link rel="stylesheet" href="styles-standalone.css">
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
@@ -31,7 +30,7 @@
                         <p class="subtitle">Outil professionnel pour marchands de biens</p>
                     </div>
                 </div>
-                <button class="btn btn-primary" id="exportPdf">
+                <button id="exportPdf" class="btn btn-primary">
                     <i data-lucide="download"></i>
                     Exporter PDF
                 </button>
@@ -40,227 +39,263 @@
     </header>
 
     <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
-            <div class="grid-layout">
-                <!-- Left Panel - Forms -->
-                <div class="left-panel">
-                    <!-- Tabs -->
-                    <div class="tabs">
-                        <div class="tabs-list">
-                            <button class="tab-trigger active" data-tab="basic">
-                                <i data-lucide="building"></i>
-                                Bien
-                            </button>
-                            <button class="tab-trigger" data-tab="financial">
-                                <i data-lucide="calculator"></i>
-                                Financier
-                            </button>
-                            <button class="tab-trigger" data-tab="technical">
-                                <i data-lucide="wrench"></i>
-                                Technique
-                            </button>
-                            <button class="tab-trigger" data-tab="market">
-                                <i data-lucide="map-pin"></i>
-                                Marché
-                            </button>
-                        </div>
+    <main class="container main-content">
+        <div class="grid-layout">
+            <!-- Left Panel - Forms -->
+            <div class="left-panel">
+                <div class="tabs">
+                    <div class="tabs-list">
+                        <button class="tab-trigger active" data-tab="basic">
+                            <i data-lucide="building"></i>
+                            Bien
+                        </button>
+                        <button class="tab-trigger" data-tab="financial">
+                            <i data-lucide="calculator"></i>
+                            Financier
+                        </button>
+                        <button class="tab-trigger" data-tab="technical">
+                            <i data-lucide="wrench"></i>
+                            Technique
+                        </button>
+                        <button class="tab-trigger" data-tab="market">
+                            <i data-lucide="map-pin"></i>
+                            Marché
+                        </button>
+                    </div>
 
-                        <!-- Tab Contents -->
-                        <div class="tab-content active" id="basic">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i data-lucide="building"></i>
-                                        Informations du bien
-                                    </h3>
-                                    <p class="card-description">Renseignez les caractéristiques principales du bien immobilier</p>
+                    <!-- Basic Property Info Tab -->
+                    <div class="tab-content active" id="basic">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i data-lucide="building"></i>
+                                    Informations du bien
+                                </h3>
+                                <p class="card-description">Renseignez les caractéristiques principales du bien immobilier</p>
+                            </div>
+                            <div class="card-content">
+                                <!-- URL Analysis Section -->
+                                <div style="padding: 1rem; background: var(--accent); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 1.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                        <i data-lucide="globe" style="color: var(--primary);"></i>
+                                        <span style="font-size: 0.875rem; font-weight: 500;">Analyse automatique d'annonce</span>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <input type="url" id="listingUrl" placeholder="https://www.seloger.com/annonces/achat/..." style="flex: 1;">
+                                        <button id="analyzeButton" class="btn btn-primary" style="min-width: 140px;">
+                                            <i data-lucide="globe"></i>
+                                            Analyse complète
+                                        </button>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--muted-foreground); line-height: 1.4;">
+                                        <p>✓ L'IA analysera automatiquement le contenu et les photos de l'annonce</p>
+                                        <p>✓ Extraction du prix, surface, localisation, description</p>
+                                        <p>✓ Estimation des travaux et du potentiel de revente</p>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.5rem;">
+                                            <span class="badge badge-outline">SeLoger</span>
+                                            <span class="badge badge-outline">LeBonCoin</span>
+                                            <span class="badge badge-outline">PAP</span>
+                                            <span class="badge badge-outline">Orpi</span>
+                                            <span class="badge badge-outline">Century21</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-content">
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label for="title">Titre de l'annonce</label>
-                                            <input type="text" id="title" placeholder="Ex: Appartement 3 pièces à rénover">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="location">Localisation</label>
-                                            <input type="text" id="location" placeholder="Ex: Paris 11ème">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="price">Prix demandé (€)</label>
-                                            <input type="number" id="price" placeholder="250000">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="surface">Surface (m²)</label>
-                                            <input type="number" id="surface" placeholder="65">
-                                        </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="title">Titre de l'annonce</label>
+                                        <input type="text" id="title" placeholder="Ex: Appartement 3 pièces à rénover">
                                     </div>
                                     <div class="form-group">
-                                        <label for="description">Description de l'annonce</label>
-                                        <textarea id="description" rows="6" placeholder="Collez ici le contenu de l'annonce immobilière..."></textarea>
+                                        <label for="location">Localisation</label>
+                                        <input type="text" id="location" placeholder="Ex: Paris 11ème">
                                     </div>
-                                    <div id="pricePerSqmDisplay" class="info-box" style="display: none;">
-                                        <p>Prix au m² : <span id="pricePerSqmValue" class="highlight"></span></p>
+                                    <div class="form-group">
+                                        <label for="price">Prix demandé (€)</label>
+                                        <input type="number" id="price" placeholder="250000">
                                     </div>
+                                    <div class="form-group">
+                                        <label for="surface">Surface (m²)</label>
+                                        <input type="number" id="surface" placeholder="65">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description de l'annonce</label>
+                                    <textarea id="description" rows="6" placeholder="Collez ici le contenu de l'annonce immobilière..."></textarea>
+                                </div>
+                                <div id="pricePerSqmDisplay" class="info-box" style="display: none;">
+                                    <p>Prix au m² : <span id="pricePerSqmValue" class="highlight"></span></p>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="tab-content" id="financial">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i data-lucide="calculator"></i>
-                                        Analyse financière
-                                    </h3>
-                                    <p class="card-description">Estimez les coûts et la rentabilité du projet</p>
-                                </div>
-                                <div class="card-content">
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label for="notaryFees">Frais de notaire (€)</label>
-                                            <input type="number" id="notaryFees" placeholder="20000">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="renovationCosts">Coût des travaux (€)</label>
-                                            <input type="number" id="renovationCosts" placeholder="50000">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="resalePrice">Prix de revente estimé (€)</label>
-                                            <input type="number" id="resalePrice" placeholder="380000">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="timeToSell">Délai de revente (mois)</label>
-                                            <input type="number" id="timeToSell" placeholder="8">
-                                        </div>
+                    <!-- Financial Tab -->
+                    <div class="tab-content" id="financial">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i data-lucide="calculator"></i>
+                                    Analyse financière
+                                </h3>
+                                <p class="card-description">Estimez les coûts et la rentabilité du projet</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="notaryFees">Frais de notaire (€)</label>
+                                        <input type="number" id="notaryFees" placeholder="20000">
                                     </div>
-                                    <div id="financialSummary"></div>
+                                    <div class="form-group">
+                                        <label for="renovationCosts">Coût des travaux (€)</label>
+                                        <input type="number" id="renovationCosts" placeholder="50000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="resalePrice">Prix de revente estimé (€)</label>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <input type="number" id="resalePrice" placeholder="380000" style="flex: 1;">
+                                            <button id="estimateButton" class="btn btn-outline" type="button" style="padding: 0.75rem; min-width: 80px;">
+                                                Estimer
+                                            </button>
+                                        </div>
+                                        <p id="estimationNote" style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.25rem; display: none;">
+                                            Estimation basée sur le marché local et l'état du bien
+                                        </p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="timeToSell">Délai de revente (mois)</label>
+                                        <input type="number" id="timeToSell" placeholder="8">
+                                    </div>
                                 </div>
+                                <div id="financialSummary"></div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="tab-content" id="technical">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i data-lucide="wrench"></i>
-                                        État technique
-                                    </h3>
-                                    <p class="card-description">Évaluez l'état général du bien et les travaux nécessaires</p>
-                                </div>
-                                <div class="card-content">
-                                    <div class="technical-grid">
-                                        <div class="condition-group">
-                                            <label>État structurel (/10)</label>
-                                            <div class="progress-container">
-                                                <div class="progress">
-                                                    <div class="progress-bar" id="structuralProgress"></div>
-                                                </div>
-                                                <div class="progress-labels">
-                                                    <span>Mauvais</span>
-                                                    <span id="structuralValue">5/10</span>
-                                                    <span>Excellent</span>
-                                                </div>
+                    <!-- Technical Tab -->
+                    <div class="tab-content" id="technical">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i data-lucide="wrench"></i>
+                                    État technique
+                                </h3>
+                                <p class="card-description">Évaluez l'état général du bien et les travaux nécessaires</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="technical-grid">
+                                    <div class="condition-group">
+                                        <label>État structurel (/10)</label>
+                                        <div class="progress-container">
+                                            <div class="progress">
+                                                <div class="progress-bar" id="structuralProgress"></div>
                                             </div>
-                                            <input type="range" id="structuralCondition" min="0" max="10" step="0.5" value="5">
-                                        </div>
-                                        
-                                        <div class="condition-group">
-                                            <label>État technique (/10)</label>
-                                            <div class="progress-container">
-                                                <div class="progress">
-                                                    <div class="progress-bar" id="technicalProgress"></div>
-                                                </div>
-                                                <div class="progress-labels">
-                                                    <span>Mauvais</span>
-                                                    <span id="technicalValue">5/10</span>
-                                                    <span>Excellent</span>
-                                                </div>
+                                            <div class="progress-labels">
+                                                <span>Mauvais</span>
+                                                <span id="structuralValue">5/10</span>
+                                                <span>Excellent</span>
                                             </div>
-                                            <input type="range" id="technicalCondition" min="0" max="10" step="0.5" value="5">
                                         </div>
+                                        <input type="range" id="structuralCondition" min="0" max="10" step="0.5" value="5">
                                     </div>
                                     
+                                    <div class="condition-group">
+                                        <label>État technique (/10)</label>
+                                        <div class="progress-container">
+                                            <div class="progress">
+                                                <div class="progress-bar" id="technicalProgress"></div>
+                                            </div>
+                                            <div class="progress-labels">
+                                                <span>Mauvais</span>
+                                                <span id="technicalValue">5/10</span>
+                                                <span>Excellent</span>
+                                            </div>
+                                        </div>
+                                        <input type="range" id="technicalCondition" min="0" max="10" step="0.5" value="5">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="energyRating">Classe énergétique</label>
+                                    <select id="energyRating">
+                                        <option value="A">A - Très économe</option>
+                                        <option value="B">B - Économe</option>
+                                        <option value="C">C - Correct</option>
+                                        <option value="D" selected>D - Moyen</option>
+                                        <option value="E">E - Énergivore</option>
+                                        <option value="F">F - Très énergivore</option>
+                                        <option value="G">G - Extrêmement énergivore</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Market Tab -->
+                    <div class="tab-content" id="market">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i data-lucide="map-pin"></i>
+                                    Analyse de marché
+                                </h3>
+                                <p class="card-description">Évaluez le marché local et les tendances</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-grid">
                                     <div class="form-group">
-                                        <label for="energyRating">Classe énergétique</label>
-                                        <select id="energyRating">
-                                            <option value="A">A - Très économe</option>
-                                            <option value="B">B - Économe</option>
-                                            <option value="C">C - Correct</option>
-                                            <option value="D" selected>D - Moyen</option>
-                                            <option value="E">E - Énergivore</option>
-                                            <option value="F">F - Très énergivore</option>
-                                            <option value="G">G - Extrêmement énergivore</option>
-                                        </select>
+                                        <label for="marketTrend">Tendance du marché (%/an)</label>
+                                        <input type="number" id="marketTrend" step="0.1" placeholder="2.5">
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tab-content" id="market">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i data-lucide="map-pin"></i>
-                                        Analyse de marché
-                                    </h3>
-                                    <p class="card-description">Évaluez le marché local et les tendances</p>
-                                </div>
-                                <div class="card-content">
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label for="marketTrend">Tendance du marché (%/an)</label>
-                                            <input type="number" id="marketTrend" step="0.1" placeholder="2.5">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="sellingTime">Temps de vente moyen (mois)</label>
-                                            <input type="number" id="sellingTime" placeholder="6" value="6">
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="sellingTime">Temps de vente moyen (mois)</label>
+                                        <input type="number" id="sellingTime" placeholder="6">
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Strategy Comparison -->
-                    <div id="strategyComparison"></div>
                 </div>
 
-                <!-- Right Panel - Summary & Analysis -->
-                <div class="right-panel">
-                    <!-- Recommendation -->
-                    <div class="card" id="recommendationCard">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i data-lucide="target"></i>
-                                Recommandation
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div id="recommendationContent"></div>
-                        </div>
-                    </div>
+                <!-- Strategy Comparison Section -->
+                <div id="strategyComparison"></div>
+            </div>
 
-                    <!-- Global Scores -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i data-lucide="bar-chart-3"></i>
-                                Score Global
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <div id="globalScores"></div>
-                        </div>
+            <!-- Right Panel - Summary & Analysis -->
+            <div class="right-panel">
+                <!-- Recommendation -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i data-lucide="target"></i>
+                            Recommandation
+                        </h3>
                     </div>
-
-                    <!-- Risk Analysis -->
-                    <div id="riskAnalysis"></div>
+                    <div class="card-content">
+                        <div id="recommendationContent"></div>
+                    </div>
                 </div>
+
+                <!-- Global Scores -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i data-lucide="bar-chart-3"></i>
+                            Scores Globaux
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="globalScores"></div>
+                    </div>
+                </div>
+
+                <!-- Risk Analysis -->
+                <div id="riskAnalysis"></div>
             </div>
         </div>
     </main>
 
+    <!-- JavaScript -->
     <script src="script-standalone.js"></script>
     <script>
         // Initialize Lucide icons
